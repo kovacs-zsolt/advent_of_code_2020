@@ -1,3 +1,5 @@
 enc_temp_folder
 .vscode
 .vs
+bin
+intermediate

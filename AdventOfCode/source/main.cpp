@@ -2,9 +2,10 @@
 
 namespace Day2 { void part1(); }
 namespace Day3 { void part1(); }
+namespace Day4 { void part1(); }
 
 
 int main()
 {
-	Day3::part1();
+	Day4::part1();
 }

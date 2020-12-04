@@ -19,12 +19,18 @@
     <ClCompile Include="..\source\Day3.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\Day4.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\Day1.h">
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="..\source\Day3.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Day4.h">
       <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
