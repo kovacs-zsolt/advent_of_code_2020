@@ -22,16 +22,26 @@
     <ClCompile Include="..\source\Day4.cpp">
       <Filter>source</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\source\Day1.h">
+    <ClCompile Include="..\source\Day5.cpp">
       <Filter>source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\Day3.h">
+    </ClCompile>
+    <ClCompile Include="..\source\Day6.cpp">
       <Filter>source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\Day4.h">
+    </ClCompile>
+    <ClCompile Include="..\source\Day7.cpp">
       <Filter>source</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="..\source\Day8.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Day9.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Day10.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Day11.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

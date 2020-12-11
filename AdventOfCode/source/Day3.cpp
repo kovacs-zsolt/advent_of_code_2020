@@ -1,5 +1,3 @@
-#include "Day3.h"
-
 #include <cassert>
 
 #include <filesystem>
@@ -57,7 +55,7 @@ uint64_t countTrees(const Map& map, const Coord& start, const Coord& slope)
 	Coord coord = start;
 	//Coord coord{ 0, 0 };
 	//Coord slope{ 3, 1 };
-	for (;coord.down < map.data.size(); coord += slope)
+	for (;static_cast<std::size_t>(coord.down) < map.data.size(); coord += slope)
 	{
 		auto field = map.get(coord);
 		if (field == Map::TREE)

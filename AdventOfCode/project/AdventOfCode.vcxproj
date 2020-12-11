@@ -20,15 +20,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\source\Day1.cpp" />
+    <ClCompile Include="..\source\Day10.cpp" />
+    <ClCompile Include="..\source\Day11.cpp" />
     <ClCompile Include="..\source\Day2.cpp" />
     <ClCompile Include="..\source\Day3.cpp" />
     <ClCompile Include="..\source\Day4.cpp" />
+    <ClCompile Include="..\source\Day5.cpp" />
+    <ClCompile Include="..\source\Day6.cpp" />
+    <ClCompile Include="..\source\Day7.cpp" />
+    <ClCompile Include="..\source\Day8.cpp" />
+    <ClCompile Include="..\source\Day9.cpp" />
     <ClCompile Include="..\source\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\source\Day1.h" />
-    <ClInclude Include="..\source\Day3.h" />
-    <ClInclude Include="..\source\Day4.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

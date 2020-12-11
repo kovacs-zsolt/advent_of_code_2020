@@ -1,11 +1,12 @@
-#include "Day4.h"
-
 #include <cassert>
 
 #include <algorithm>
 #include <filesystem>
+#include <functional>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <numeric>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -13,79 +14,126 @@
 namespace Day4
 {
 
-bool isValid(const std::vector<std::string>& fields)
+using namespace std::string_literals;
+using Batch = std::map<std::string, std::string>;
+
+bool validRange(const std::string& value, int size, int min, int max)
+{
+	if (value.size() != size)
+		return false;
+	try
+	{
+		int num = std::stoi(value);
+		bool result = min <= num && num <= max;
+		return result;
+	}
+	catch(...)
+	{
+		return false;
+	}
+}
+
+bool hasAllRequiredFields(const Batch& batch)
 {
 	std::vector required = { "byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid" };
 	std::vector optional = { "cid" };
 
-	auto allRequired = std::all_of(required.begin(), required.end(), [&fields](const std::string& requiredField)
+	auto hasRequired = [](const Batch& batch, const std::string& requiredField)
 	{
-		auto hasRequired = std::find(fields.begin(), fields.end(), requiredField) != fields.end();
+		auto hasRequired = batch.find(requiredField) != batch.end();
 		return hasRequired;
-	});
+	};
 
-
-	auto isAllowed = std::all_of(fields.begin(), fields.end(), [&required, &optional](const auto& field)
-	{
-		auto isRequired = std::find(required.begin(), required.end(), field) != required.end();
-		auto isOptional = std::find(optional.begin(), optional.end(), field) != optional.end();
-		return isRequired || isOptional;
-	});
-
-	return allRequired;
-	//return allRequired && isAllowed;
-}
-	
-std::string fieldStr(const std::vector<std::string>& fields)
-{
-	std::stringstream ss;
-	for (const auto& field : fields)
-	{
-		ss << field << ", ";
-	}
-	return ss.str();
+	auto hasAllRequired = std::all_of(required.begin(), required.end(), [&batch, hasRequired](const std::string& requiredField) {return hasRequired(batch, requiredField); });
+	return hasAllRequired;
 }
 
-std::uint64_t countBatches(std::filesystem::path path)
+bool isValid(const Batch& batch)
 {
-	std::ifstream file(path);
-	std::string content(std::istreambuf_iterator<char>(file), {});
-	std::uint64_t count = 0;
-	for (std::size_t i = 0; i < content.size(); ++i)
+	if (hasAllRequiredFields(batch) == false)
+		return false;
+
+	bool result = true;
+	result &= validRange(batch.at({ "byr" }), 4, 1920, 2002);
+	result &= validRange(batch.at({ "iyr" }), 4, 2010, 2020);
+	result &= validRange(batch.at({ "eyr" }), 4, 2020, 2030);
+
+	auto checkHeight = [](const Batch& batch)
 	{
-		if (content[i] == '\n')
+		const std::string& whole{ batch.at("hgt") };
+		std::stringstream ss{ whole };
+		int value = -1;
+		ss >> value;
+		if (whole.find("cm") != std::string::npos)
 		{
-			if (i + 1 == content.size())
-			{
-				++count;
-			}
-			else if (content[i + 1] == '\n')
-			{
-				++count;
-			}
+			bool result = 150 <= value && value <= 193;
+			return result;
 		}
-	}
-	return count;
+		else if (whole.find("in") != std::string::npos)
+		{
+			bool result = 59 <= value && value <= 76;
+			return result;
+		}
+		return false;
+	};
+
+	result &= checkHeight(batch);
+
+	auto checkHairColor = [](const Batch& batch)
+	{
+		const std::string& value{ batch.at("hcl") };
+
+		bool result = value.size() == 7 && value[0] == '#';
+		for (std::size_t i = 1; i < value.size(); ++i)
+		{
+			result &= ('0' <= value[i] && value[i] <= '9') ||
+				('a' <= value[i] && value[i] <= 'f');
+		}
+		return result;
+	};
+	result &= checkHairColor(batch);
+
+	auto checkEyeColor = [](const Batch& batch)
+	{
+		const std::string& value{ batch.at("ecl") };
+		std::vector<std::string> values{ "amb", "blu", "brn", "gry", "grn", "hzl", "oth"};
+
+		auto it = std::find(values.begin(), values.end(), value);
+		bool result = it != values.end();
+		return result;
+	};
+	result &= checkEyeColor(batch);
+
+	auto checkPassportId = [](const Batch& batch)
+	{
+		const std::string& value{ batch.at("pid") };
+		if (value.size() != 9)
+			return false;
+		for (char c : value)
+		{
+			bool isValid = '0' <= c && c <= '9';
+			if(isValid == false)
+				return false;
+		}
+
+		return true;
+	};
+	result &= checkPassportId(batch);
+
+	return result;
 }
 
-void part1()
+std::vector<Batch> parseBatches(std::ifstream& file)
 {
-	std::filesystem::path path{ std::filesystem::current_path().parent_path() };
-	path += "/data/PuzzleInput/Day4/input.txt";
-	std::ifstream file(path);
+	std::vector<Batch> batches;
 
-	int allCount = 0;
-	int invalidAtleast7 = 0;
-	int count = 0;
-	
-	std::vector<std::string> fields;
-
+	Batch batch;
 	for (std::string line; std::getline(file, line);)
 	{
 		if (!line.empty())
 		{
 			std::stringstream ss(line);
-			for (;ss;)
+			for (; ss;)
 			{
 				std::string token;
 				ss >> token;
@@ -93,25 +141,42 @@ void part1()
 					break;
 				auto pos = token.find(':');
 				auto field = token.substr(0, pos);
-				fields.push_back(field);
+				auto value = token.substr(pos + 1);
+				batch[field] = value;
 			}
 		}
 		auto fileok = (bool)file;
 		auto iseof = file.peek() == EOF;
-		if(line.empty() || file.peek() == EOF)
+		if (line.empty() || file.peek() == EOF)
 		{
-			std::sort(fields.begin(), fields.end());
-			++allCount;
-			if (auto valid = isValid(fields))
-			{
-				++count;
-			}
-			fields.clear();
+			batches.push_back(std::move(batch));
+			batch = {};
 		}
 	}
-	std::cout << "batches: " << countBatches(path) << "\n";
-	std::cout << "valid: " << count << "\n"; // 191
-	std::cout << "allCount: " << allCount << "\n"; // 191
+	return batches;
+}
+
+void part1()
+{
+	//batches: 259
+	//valid : 192
+	//allCount : 259
+
+	std::filesystem::path path{ std::filesystem::current_path().parent_path() };
+	path += "/data/PuzzleInput/Day4/input.txt";
+	std::ifstream file(path);
+
+	std::vector<Batch> batches = parseBatches(file);
+	auto allBatches = batches.size();
+	assert(allBatches == 259);
+
+	auto allRequiredBatches = std::count_if(batches.begin(), batches.end(), [](const Batch& batch) {return hasAllRequiredFields(batch); });
+	assert(allRequiredBatches == 192);
+	auto validBatches = std::count_if(batches.begin(), batches.end(), [](const Batch& batch) {return isValid(batch); });
+	// nem 96, 105
+	std::cout << "all batches: " << allBatches << "\n";
+	std::cout << "valid batches: " << validBatches << "\n";
+
 }
 
 }

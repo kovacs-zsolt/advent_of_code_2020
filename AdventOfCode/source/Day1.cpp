@@ -1,5 +1,3 @@
-#include "Day1.h"
-
 #include <cassert>
 
 #include <filesystem>
