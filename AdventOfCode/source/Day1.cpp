@@ -29,9 +29,9 @@ void part1()
 	const std::vector<int> numbers{ loadExpenseReport() };
 	int MAGIC = 2020;
 	int result = 0;
-	for (int i = 0; i < numbers.size(); ++i)
+	for (std::size_t i = 0; i < numbers.size(); ++i)
 	{
-		for (int j = i; j < numbers.size(); ++j)
+		for (std::size_t j = i; j < numbers.size(); ++j)
 		{
 			if (numbers[i] + numbers[j] == MAGIC)
 			{
@@ -49,11 +49,11 @@ void part2()
 	const std::vector<int> numbers{ loadExpenseReport() };
 	int MAGIC = 2020;
 	int result = 0;
-	for (int i = 0; i < numbers.size(); ++i)
+	for (std::size_t i = 0; i < numbers.size(); ++i)
 	{
-		for (int j = i; j < numbers.size(); ++j)
+		for (std::size_t j = i; j < numbers.size(); ++j)
 		{
-			for (int k = j; k < numbers.size(); ++k)
+			for (std::size_t k = j; k < numbers.size(); ++k)
 			{
 				if (numbers[i] + numbers[j] + numbers[k] == MAGIC)
 				{

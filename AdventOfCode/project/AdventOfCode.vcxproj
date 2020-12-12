@@ -22,6 +22,7 @@
     <ClCompile Include="..\source\Day1.cpp" />
     <ClCompile Include="..\source\Day10.cpp" />
     <ClCompile Include="..\source\Day11.cpp" />
+    <ClCompile Include="..\source\Day12.cpp" />
     <ClCompile Include="..\source\Day2.cpp" />
     <ClCompile Include="..\source\Day3.cpp" />
     <ClCompile Include="..\source\Day4.cpp" />
