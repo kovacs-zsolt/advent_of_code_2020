@@ -77,6 +77,24 @@ constexpr Direction EAST = {1, 0};
 constexpr Direction SOUTH = {0, -1};
 constexpr Direction WEST = {-1, 0};
 
+Direction operator*(const Direction& direction, int value)
+{
+    Direction result{direction.first * value, direction.second * value};
+    return result;
+}
+
+Direction operator+(const Direction& lhs, const Direction& rhs)
+{
+    return {lhs.first + rhs.first, lhs.second + rhs.second};    
+}
+
+Direction& operator+=(Direction& lhs, const Direction& rhs)
+{
+    lhs.first += rhs.first;
+    lhs.second += rhs.second;
+    return lhs;
+}
+
 static std::vector DIRECTIONS = {NORTH, EAST, SOUTH, WEST};
 static std::map<char, Direction> DIRECTION_MAPPING =
 {
@@ -90,14 +108,14 @@ struct Where
 {
     void apply(Instruction instruction);
 
-    static Direction rotate(Direction direction, Instruction instruction);
-    static Where move(Where where, Instruction instruction);
+    Where& rotate(Instruction instruction);
+    Where& move(Instruction instruction);
 
     Direction direction = EAST;
     Position position = {0, 0};
 };
 
-Direction Where::rotate(Direction direction, Instruction instruction)
+Where& Where::rotate(Instruction instruction)
 {
     assert(instruction.isTurn());
     int indexOffset = (instruction.value / 90);
@@ -116,17 +134,21 @@ Direction Where::rotate(Direction direction, Instruction instruction)
             break;
         ++currentIndex;
     }
-    Direction newDirection = DIRECTIONS[(currentIndex + indexOffset) % DIRECTIONS.size()];
-    return newDirection;
+    Direction newDirection = DIRECTIONS[(currentIndex + indexOffset) % DIRECTIONS.size()];    
+    direction = newDirection;
+
+    return *this;
 }
 
-Where Where::move(Where where, Instruction instruction)
+Where& Where::move(Instruction instruction)
 {
     assert(instruction.isMove());
-    Direction direction = instruction.action == 'F' ? where.direction : DIRECTION_MAPPING[instruction.action];
-    Point offset{direction.first * instruction.value, direction.second * instruction.value};
-    Where result{where.direction, {where.position.first + offset.first, where.position.second + offset.second}};
-    return result;
+    Direction offsetDirection = instruction.action == 'F' ? direction : DIRECTION_MAPPING[instruction.action];
+    Point offset{offsetDirection * instruction.value};
+
+    position += offset;
+
+    return *this;
 }
 
 std::uint64_t calculateManhattanDistance(const Where& lhs, const Where& rhs)
@@ -138,11 +160,11 @@ void Where::apply(Instruction instruction)
 {
     if(instruction.isMove())
     {
-        (*this) = Where::move(*this, instruction);
+        move(instruction);
     }
     else if(instruction.isTurn())
     {
-        direction = Where::rotate(direction, instruction);
+        rotate(instruction);
     }
     else
     {
@@ -152,19 +174,14 @@ void Where::apply(Instruction instruction)
 
 void test()
 {
-    assert(Where::rotate(NORTH, {'L', 90}) == WEST);
-    assert(Where::rotate(NORTH, {'L', 180}) == SOUTH);
-    assert(Where::rotate(NORTH, {'R', 90}) == EAST);
+    Where base{NORTH};
+    assert(Where(base).rotate({'L', 90}).direction == WEST);
+    assert(Where(base).rotate({'L', 180}).direction == SOUTH);
+    assert(Where(base).rotate({'R', 90}).direction == EAST);
 }
 
-void part1()
+int getAnswer(const std::filesystem::path& path)
 {
-    test();
-
-    std::filesystem::path path{std::filesystem::current_path().parent_path()};
-    path += "/data/PuzzleInput/Day12/input.txt";
-    //path += "/data/PuzzleInput/Day12/test";
-    //path += "/data/PuzzleInput/Day12/test2";
     std::ifstream file{path};
     assert(file);
     Instructions instructions = loadInstructions(file);
@@ -176,8 +193,24 @@ void part1()
     }
 
     auto result = calculateManhattanDistance(Where{}, where);
+    return result;
+}
 
-    std::cout << "part1: " << result << "\n"; // 879
+void part1()
+{
+    test();
+
+    std::filesystem::path inputPath{std::filesystem::current_path().parent_path()};
+    std::filesystem::path testPath{std::filesystem::current_path().parent_path()};
+    inputPath += "/data/PuzzleInput/Day12/input.txt";
+    testPath += "/data/PuzzleInput/Day12/test";
+    auto resultInput = getAnswer(inputPath);
+    auto resultTest = getAnswer(testPath);
+
+    assert(resultInput == 879);
+    assert(resultTest == 25);
+
+    std::cout << "part1: " << resultInput << "\n"; // 879
     
     int debug = 123;
 }
