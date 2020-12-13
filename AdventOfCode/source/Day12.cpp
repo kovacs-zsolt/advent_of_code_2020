@@ -1,4 +1,6 @@
 #include <cassert>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 #include <algorithm>
 #include <filesystem>
@@ -25,6 +27,7 @@ static const std::vector ACTIONS = {
     'F',
 };
 
+using Number = std::int64_t;
 
 struct Instruction
 {
@@ -32,7 +35,7 @@ struct Instruction
     bool isTurn() const;
 
     char action;
-    int value;
+    Number value;
 };
 
 bool Instruction::isMove() const
@@ -68,7 +71,7 @@ Instructions loadInstructions(std::istream& stream)
     return result;
 }
 
-using Point = std::pair<int, int>;
+using Point = std::pair<Number, Number>;
 using Direction = Point;
 using Position = Point;
 
@@ -77,15 +80,25 @@ constexpr Direction EAST = {1, 0};
 constexpr Direction SOUTH = {0, -1};
 constexpr Direction WEST = {-1, 0};
 
-Direction operator*(const Direction& direction, int value)
+Direction operator*(const Direction& direction, Number value)
 {
     Direction result{direction.first * value, direction.second * value};
     return result;
 }
 
+Direction operator*(Number value, const Direction& direction)
+{
+    return direction * value;
+}
+
 Direction operator+(const Direction& lhs, const Direction& rhs)
 {
     return {lhs.first + rhs.first, lhs.second + rhs.second};    
+}
+
+Direction operator-(const Direction& lhs, const Direction& rhs)
+{
+    return {lhs.first - rhs.first, lhs.second - rhs.second};
 }
 
 Direction& operator+=(Direction& lhs, const Direction& rhs)
@@ -110,6 +123,7 @@ struct Where
 
     Where& rotate(Instruction instruction);
     Where& move(Instruction instruction);
+    Where& rotatePoint(Instruction instruction);
 
     Direction direction = EAST;
     Position position = {0, 0};
@@ -118,7 +132,7 @@ struct Where
 Where& Where::rotate(Instruction instruction)
 {
     assert(instruction.isTurn());
-    int indexOffset = (instruction.value / 90);
+    int indexOffset = static_cast<int>(instruction.value / 90);
     switch(instruction.action)
     {
         case 'L':
@@ -137,6 +151,26 @@ Where& Where::rotate(Instruction instruction)
     Direction newDirection = DIRECTIONS[(currentIndex + indexOffset) % DIRECTIONS.size()];    
     direction = newDirection;
 
+    return *this;
+}
+
+Where& Where::rotatePoint(Instruction instruction)
+{
+    assert(instruction.action == 'R' || instruction.action == 'L');
+    auto sign = instruction.action == 'R' ? 1 : -1;
+    sign *= -1; // internet math thought it rotates the other way
+    auto degree = sign * instruction.value;
+    double radian = (degree/180.0) * M_PI;
+
+    auto x = position.first;
+    auto y = position.second;
+
+    auto sin = std::sin(radian);
+    auto cos = std::cos(radian);
+    
+    Number x_ = static_cast<Number>(std::round(x * cos - y * sin));
+    Number y_ = static_cast<Number>(std::round(x * sin + y * cos));
+    position = {x_, y_};
     return *this;
 }
 
@@ -180,7 +214,7 @@ void test()
     assert(Where(base).rotate({'R', 90}).direction == EAST);
 }
 
-int getAnswer(const std::filesystem::path& path)
+std::uint64_t getAnswerPart1(const std::filesystem::path& path)
 {
     std::ifstream file{path};
     assert(file);
@@ -204,15 +238,69 @@ void part1()
     std::filesystem::path testPath{std::filesystem::current_path().parent_path()};
     inputPath += "/data/PuzzleInput/Day12/input.txt";
     testPath += "/data/PuzzleInput/Day12/test";
-    auto resultInput = getAnswer(inputPath);
-    auto resultTest = getAnswer(testPath);
+    auto resultInput = getAnswerPart1(inputPath);
+    auto resultTest = getAnswerPart1(testPath);
 
     assert(resultInput == 879);
     assert(resultTest == 25);
 
     std::cout << "part1: " << resultInput << "\n"; // 879
     
-    int debug = 123;
+    Number debug = 123;
+}
+
+std::uint64_t getAnswerPart2(const std::filesystem::path& path)
+{
+    std::ifstream file{path};
+    assert(file);
+    Instructions instructions = loadInstructions(file);
+
+    Point waypointOffset{(10 * EAST + 1 * NORTH)};
+
+    Where ship;
+    Where waypoint{ship};
+
+    waypoint.position = waypointOffset;
+
+    for(const Instruction& instruction : instructions)
+    {
+        if(instruction.action != 'F')
+        {
+            if(instruction.isMove())
+            {
+                waypoint.apply(instruction);
+            }
+            else
+            {
+                waypoint.rotatePoint(instruction);
+            }
+        }
+        else
+        {
+            ship.position += waypoint.position * instruction.value;
+            Number debug = 123;
+        }
+        int debug = 123;
+    }
+
+    auto result = calculateManhattanDistance(Where{}, ship);
+    return result;
+}
+
+void part2()
+{
+    std::filesystem::path inputPath{std::filesystem::current_path().parent_path()};
+    std::filesystem::path testPath{std::filesystem::current_path().parent_path()};
+    inputPath += "/data/PuzzleInput/Day12/input.txt";
+    testPath += "/data/PuzzleInput/Day12/test";
+
+    auto answerTest = getAnswerPart2(testPath);
+    assert(answerTest == 286);
+
+    auto answerReal = getAnswerPart2(inputPath);
+    assert(answerReal == 18107);
+    std::cout << "part2: real: " << getAnswerPart2(inputPath) << "\n"; // 18107
+    Number debug = 123;
 }
 
 }

@@ -13,4 +13,5 @@ namespace Day12 { void part1(); void part2(); }
 int main()
 {
 	Day12::part1();
+	Day12::part2();
 }
