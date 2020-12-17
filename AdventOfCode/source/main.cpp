@@ -10,10 +10,12 @@ namespace Day10 { void part1(); void part2(); }
 namespace Day11 { void part1(); void part2(); }
 namespace Day12 { void part1(); void part2(); }
 namespace Day13 { void part1(); void part2(); }
-namespace Day14 { void part1(); void part2(); }
+namespace Day14 { void part1(); void part2(); void solve(); }
+namespace Day15 { void part1(); void part2(); void solve(); }
+namespace Day16 { void part1(); void part2(); void solve(); }
+namespace Day17 { void part1(); void part2(); void solve(); }
 
 int main()
 {
-	Day14::part1();
-	// Day14::part2();
+	Day17::solve();
 }
