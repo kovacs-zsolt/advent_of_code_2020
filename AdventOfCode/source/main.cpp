@@ -18,6 +18,5 @@ namespace Day17_part2 { void part1(); void part2(); void solve(); }
 
 int main()
 {
-	//Day17::solve();
-	Day17_part2::solve();
+	Day16::solve();
 }
