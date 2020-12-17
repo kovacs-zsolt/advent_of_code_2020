@@ -17,7 +17,7 @@
 #include <tuple>
 #include <vector>
 
-namespace Day17
+namespace Day17_part2
 {
 
 using Number = std::uint64_t;
@@ -26,20 +26,21 @@ using Coordinate = std::int64_t;
 
 struct Point
 {
-    static std::tuple<Coordinate, Coordinate, Coordinate> toTuple(const Point& point);
+    static std::tuple<Coordinate, Coordinate, Coordinate, Coordinate> toTuple(const Point& point);
     Coordinate x;
     Coordinate y;
     Coordinate z;
+    Coordinate w;
 };
 
-std::tuple<Coordinate, Coordinate, Coordinate> Point::toTuple(const Point& point)
+std::tuple<Coordinate, Coordinate, Coordinate, Coordinate> Point::toTuple(const Point& point)
 {
-    return {point.x, point.y, point.z};
+    return {point.x, point.y, point.z, point.w};
 }
 
 std::ostream& operator<<(std::ostream& stream, const Point& point)
 {
-    return stream << "(" << point.x << "," << point.y << "," << point.z << ")";
+    return stream << "(" << point.x << "," << point.y << "," << point.z << "," << point.w << ")";
 }
 
 bool operator<(const Point& lhs, const Point& rhs)
@@ -89,12 +90,13 @@ std::map<Point, Status> Space::load(std::istream& stream)
     Coordinate x = 0;
     Coordinate y = 0;
     Coordinate z = 0;
+    Coordinate w = 0;
     std::string line;
     for(y = 0; std::getline(stream, line); ++y)
     {
         for(x = 0; x < line.size(); ++x)
         {
-            Point point{x, y, z};
+            Point point{x, y, z, w};
             Status status{line[static_cast<std::size_t>(x)]};
             auto [it, inserted] = result.insert({point, status});
             assert(inserted);
@@ -111,7 +113,7 @@ Status Space::getStatus(const Point& point) const
 
 Number Space::countActiveNeighbours(const Point& point) const
 {
-    auto [x, y, z] = point;
+    auto [x, y, z, w] = point;
 
     Number sum = 0;
     for(int i = -1; i <= 1; ++i)
@@ -120,15 +122,18 @@ Number Space::countActiveNeighbours(const Point& point) const
         {
             for(int k = -1; k <= 1; ++k)
             {
-                if(i == 0 && j == 0 && k == 0)
+                for(int l = -1; l <= 1; ++l)
                 {
-                    continue;
-                }
-                Point neighbour = {x + i, y + j, z + k};
-                Status neighbourStatus = getStatus(neighbour);
-                if(neighbourStatus == Status::ACTIVE)
-                {
-                    ++sum;
+                    if(i == 0 && j == 0 && k == 0 && l == 0)
+                    {
+                        continue;
+                    }
+                    Point neighbour = {x + i, y + j, z + k, w + l};
+                    Status neighbourStatus = getStatus(neighbour);
+                    if(neighbourStatus == Status::ACTIVE)
+                    {
+                        ++sum;
+                    }
                 }
             }
         }
@@ -141,70 +146,82 @@ Boundary Space::getBounds(const SpaceData& spaceData)
     Coordinate minX = std::numeric_limits<Coordinate>::max(), maxX = std::numeric_limits<Coordinate>::min();
     Coordinate minY = std::numeric_limits<Coordinate>::max(), maxY = std::numeric_limits<Coordinate>::min();
     Coordinate minZ = std::numeric_limits<Coordinate>::max(), maxZ = std::numeric_limits<Coordinate>::min();
+    Coordinate minW = std::numeric_limits<Coordinate>::max(), maxW = std::numeric_limits<Coordinate>::min();
 
     std::map<Point, Status> framePoints;
     for(const auto& [point, status] : spaceData)
     {
-        auto [x, y, z] = point;
+        auto [x, y, z, w] = point;
         if(x < minX)
             minX = x;
         if(y < minY)
             minY = y;
         if(z < minZ)
             minZ = z;
+        if(w < minW)
+            minW = z;
+
         if(x > maxX)
             maxX = x;
         if(y > maxY)
             maxY = y;
         if(z > maxZ)
             maxZ = z;
-
+        if(w > maxW)
+            maxW = w;
     }
     Boundary result;
-    result.min = {minX, minY, minZ};
-    result.max = {maxX, maxY, maxZ};
+    result.min = {minX, minY, minZ, minW};
+    result.max = {maxX, maxY, maxZ, maxW};
     return result;
 }
 
 void Space::print(const SpaceData& spaceData, std::ostream& stream)
 {
     auto [min, max] = getBounds(spaceData);
-    auto [minX, minY, minZ] = min;
-    auto [maxX, maxY, maxZ] = max;
+    auto [minX, minY, minZ, minW] = min;
+    auto [maxX, maxY, maxZ, maxW] = max;
     stream << "min: " << min << " max: " << max << "\n";
-    for(auto z = minZ; z <= maxZ; ++z)
+    for(auto w = minW; w <= maxW; ++w)
     {
-        stream << "Z = " << z << ":\n";
-
-        for(auto y = minY; y <= maxY; ++y)
+        stream << "W = " << w << ":\n";
+        for(auto z = minZ; z <= maxZ; ++z)
         {
-            for(auto x = minX; x <= maxX; ++x)
+            stream << "Z = " << z << ", W = " << w << ":\n";
+
+            for(auto y = minY; y <= maxY; ++y)
             {
-                Point point{x, y, z};
-                
-                auto it = spaceData.find(point);
-                Status status = it == spaceData.end() ? Status::INACTIVE : it->second;
-                stream << static_cast<char>(status);
+                for(auto x = minX; x <= maxX; ++x)
+                {
+                    Point point{x, y, z};
+
+                    auto it = spaceData.find(point);
+                    Status status = it == spaceData.end() ? Status::INACTIVE : it->second;
+                    stream << static_cast<char>(status);
+                }
+                stream << "\n";
             }
             stream << "\n";
         }
-        stream << "\n";
     }
 }
 
 std::map<Point, Status> Space::createFrame() const
 {
     auto [min, max] = getBounds(space);
-    auto [minX, minY, minZ] = min;
-    auto [maxX, maxY, maxZ] = max;
+    auto [minX, minY, minZ, minW] = min;
+    auto [maxX, maxY, maxZ, maxW] = max;
     std::map<Point, Status> framePoints;
 
     for(Coordinate y = minY - 1; y <= maxY + 1; ++y)
     {
         for(Coordinate z = minZ - 1; z <= maxZ + 1; ++z)
         {
-            framePoints.insert({{minX - 1, y, z}, Status::INACTIVE} );
-            framePoints.insert({{maxX + 1, y, z}, Status::INACTIVE} );
+            for(Coordinate w = minW - 1; w <= maxW + 1; ++w)
+            {
+                framePoints.insert({{minX - 1, y, z, w}, Status::INACTIVE});
+                framePoints.insert({{maxX + 1, y, z, w}, Status::INACTIVE});
+            }
         }
     }
 
@@ -212,8 +229,11 @@ std::map<Point, Status> Space::createFrame() const
     {
         for(Coordinate z = minZ - 1; z <= maxZ + 1; ++z)
         {
-            framePoints.insert({{x, minY - 1, z}, Status::INACTIVE});
-            framePoints.insert({{x, maxY + 1, z}, Status::INACTIVE});
+            for(Coordinate w = minW - 1; w <= maxW + 1; ++w)
+            {
+                framePoints.insert({{x, minY - 1, z, w}, Status::INACTIVE});
+                framePoints.insert({{x, maxY + 1, z, w}, Status::INACTIVE});
+            }
         }
     }
 
@@ -221,8 +241,23 @@ std::map<Point, Status> Space::createFrame() const
     {
         for(Coordinate y = minY - 1; y <= maxY + 1; ++y)
         {
-            framePoints.insert({{x, y, minZ - 1}, Status::INACTIVE});
-            framePoints.insert({{x, y, maxZ + 1}, Status::INACTIVE});
+            for(Coordinate w = minW - 1; w <= maxW + 1; ++w)
+            {
+                framePoints.insert({{x, y, minZ - 1, w}, Status::INACTIVE});
+                framePoints.insert({{x, y, maxZ + 1, w}, Status::INACTIVE});
+            }
+        }
+    }
+
+    for(Coordinate x = minX - 1; x <= maxX + 1; ++x)
+    {
+        for(Coordinate y = minY - 1; y <= maxY + 1; ++y)
+        {
+            for(Coordinate z = minZ - 1; z <= maxZ + 1; ++z)
+            {
+                framePoints.insert({{x, y, z, minW - 1}, Status::INACTIVE});
+                framePoints.insert({{x, y, z, maxW + 1}, Status::INACTIVE});
+            }
         }
     }
 
@@ -253,6 +288,9 @@ Status Space::getStatusInNextStep(const Point& point, Status status) const
                 newStatus = Status::INACTIVE;
         }
         break;
+
+        default:
+            assert(false);
     }
     return newStatus;
 }
@@ -278,7 +316,7 @@ void Space::run(int numSteps)
 {
     for(int i = 0; i < numSteps; ++i)
     {
-        //std::cout << "cycle " << i << "\n";
+        std::cout << "cycle " << i << "\n";
         //print(space, std::cout);
         auto next = step();
         space = std::move(next);
@@ -296,7 +334,7 @@ Number Space::countActiveCubes() const
     return result;
 }
 
-Number getAnswerPart1(const std::filesystem::path& path)
+Number getAnswerPart2(const std::filesystem::path& path)
 {
     std::ifstream file{path};
     assert(file);
@@ -307,39 +345,20 @@ Number getAnswerPart1(const std::filesystem::path& path)
     return result;
 }
 
-Number getAnswerPart2(const std::filesystem::path& path)
-{
-    Number result = 0;
-    return result;
-}
-
 void solve()
 {
     std::filesystem::path inputPath{std::filesystem::current_path().parent_path()};
     std::filesystem::path testPath{std::filesystem::current_path().parent_path()};
     inputPath += "/data/PuzzleInput/Day17/input.txt";
     testPath += "/data/PuzzleInput/Day17/test";
-
-    auto resultTest = getAnswerPart1(testPath);
-    std::cout << "test part1: " << resultTest << "\n";
-    assert(resultTest == 112);
-
-    auto resultInput = getAnswerPart1(inputPath);
-    std::cout << "real part1: " << resultInput << "\n";
-    assert(resultInput == 304);
-
-
-
-    std::filesystem::path testPath2{std::filesystem::current_path().parent_path()};
-    testPath2 += "/data/PuzzleInput/Day14/test2";
-
-    auto resultTest2 = getAnswerPart2(testPath2);
+    std::cout << "solve";
+    auto resultTest2 = getAnswerPart2(testPath);
     std::cout << "test part2: " << resultTest2 << "\n";
-    //assert(resultTest2 == 208);
+    assert(resultTest2 == 848);
 
     auto resultInput2 = getAnswerPart2(inputPath);
     std::cout << "real part2: " << resultInput2 << "\n";
-    //assert(resultInput2 == 3348493585827);
+    assert(resultInput2 == 1868);
 
     int debug = 123;
 }

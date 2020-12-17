@@ -14,8 +14,10 @@ namespace Day14 { void part1(); void part2(); void solve(); }
 namespace Day15 { void part1(); void part2(); void solve(); }
 namespace Day16 { void part1(); void part2(); void solve(); }
 namespace Day17 { void part1(); void part2(); void solve(); }
+namespace Day17_part2 { void part1(); void part2(); void solve(); }
 
 int main()
 {
-	Day17::solve();
+	//Day17::solve();
+	Day17_part2::solve();
 }

@@ -64,5 +64,8 @@
     <ClCompile Include="..\source\Day17.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\Day17_part2.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
