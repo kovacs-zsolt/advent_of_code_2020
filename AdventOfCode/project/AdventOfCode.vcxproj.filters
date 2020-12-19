@@ -8,6 +8,9 @@
     <Filter Include="data">
       <UniqueIdentifier>{8b19a57c-3366-4f72-9653-34782d720478}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\Day18">
+      <UniqueIdentifier>{eb5a0e91-590b-4c2f-b5b2-6556d278f85c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\source\Day1.cpp">
@@ -67,5 +70,34 @@
     <ClCompile Include="..\source\Day17_part2.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\Day18.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Day18\Recogniser.cpp">
+      <Filter>source\Day18</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Day18\Parser.cpp">
+      <Filter>source\Day18</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Day18\Shunting-yard.cpp">
+      <Filter>source\Day18</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Day18\Tokenizer.cpp">
+      <Filter>source\Day18</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\source\Day18\Recogniser.hh">
+      <Filter>source\Day18</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Day18\Parser.hh">
+      <Filter>source\Day18</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Day18\Shunting-yard.hh">
+      <Filter>source\Day18</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Day18\Tokenizer.hh">
+      <Filter>source\Day18</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

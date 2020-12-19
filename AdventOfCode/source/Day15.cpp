@@ -25,10 +25,9 @@ struct Game
 {
 public:
     Game(const std::filesystem::path& initialNumbersPath) : initialNumbersPath{initialNumbersPath}{}
-    Number run();
+    Number run(Number turnCount);
 
 private:
-    static constexpr Number TURN_COUNT = 2020;
     static std::vector<Number> load(std::istream& stream);
     const std::filesystem::path initialNumbersPath;
     std::vector<Number> initialNumbers;
@@ -68,7 +67,7 @@ void Game::addNumber(Number number, Number turn)
     data.turns.push_back(turn);
 }
 
-Number Game::run()
+Number Game::run(Number turnCount)
 {
     std::ifstream file{initialNumbersPath};
     assert(file);
@@ -81,7 +80,7 @@ Number Game::run()
         ++turn;
     }
     assert(history.empty() == false);
-    for(;turn <= TURN_COUNT; ++turn)
+    for(;turn <= turnCount; ++turn)
     {
         Number number = history.back();
         Data& data = extendedHistory[number];
@@ -98,15 +97,16 @@ Number Game::run()
             addNumber(nextNumber, turn);
         }
     }
-    assert(history.size() == TURN_COUNT);
-    Number result = history[TURN_COUNT - 1];
+    assert(history.size() == turnCount);
+    Number result = history[static_cast<std::size_t>(turnCount) - 1];
     return result;
 }
 
 Number getAnswerPart1(const std::filesystem::path& path)
 {
+    static constexpr Number TURN_COUNT = 2020;
     Game game{path};
-    return game.run();
+    return game.run(TURN_COUNT);
     //std::ifstream file{path};
     //assert(file);
     //auto numbers = load(file);
@@ -115,8 +115,13 @@ Number getAnswerPart1(const std::filesystem::path& path)
 
 Number getAnswerPart2(const std::filesystem::path& path)
 {
-    Number result = 0;
-    return result;
+    static constexpr Number TURN_COUNT = 30000000;
+    Game game{path};
+    return game.run(TURN_COUNT);
+    //std::ifstream file{path};
+    //assert(file);
+    //auto numbers = load(file);
+    //return run(numbers);
 }
 
 
@@ -140,13 +145,13 @@ void solve()
     std::filesystem::path testPath2{std::filesystem::current_path().parent_path()};
     testPath2 += "/data/PuzzleInput/Day14/test2";
 
-    auto resultTest2 = getAnswerPart2(testPath2);
-    std::cout << "test part2: " << resultTest2 << "\n";
-    //assert(resultTest2 == 208);
+    //auto resultTest2 = getAnswerPart2(testPath2);
+    //std::cout << "test part2: " << resultTest2 << "\n";
+    ////assert(resultTest2 == 208);
 
     auto resultInput2 = getAnswerPart2(inputPath);
     std::cout << "real part2: " << resultInput2 << "\n";
-    //assert(resultInput2 == 3348493585827);
+    assert(resultInput2 == 112458);
 
     int debug = 123;
 }

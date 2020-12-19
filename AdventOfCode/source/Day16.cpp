@@ -215,17 +215,71 @@ Number Data::calculateFields()
     const std::size_t numFields = tickets.front().values.size();
 
     std::vector<std::vector<std::size_t>> validFields; // Ticket value pos -> possible Fields
+    validFields.resize(numFields);
 
     for(std::size_t pos = 0; pos < numFields; ++pos)
     {
-        std::size_t index = 0;
+        std::size_t fieldIndex = 0;
         for(const Field& field : fields)
         {
-
-            ++index;
+            bool matchesAll = std::all_of(tickets.begin(), tickets.end(), [pos, &field](const Ticket& ticket)
+            {
+                Number value = ticket.values[pos];
+                return field.isInRange(value);
+            });
+            if(matchesAll)
+            {
+                validFields[pos].push_back(fieldIndex);
+            }
+            ++fieldIndex;
         }
     }
-    return 0;
+    std::map<std::size_t, std::size_t> matches;
+
+    for(; matches.size() != validFields.size();)
+    {
+        std::vector<std::size_t> toErase;
+        for(std::size_t i = 0; i < validFields.size(); ++i)
+        {
+            if(validFields[i].size() == 1)
+            {
+                std::size_t fieldIndex = validFields[i].front();
+                matches[i] = fieldIndex;
+                toErase.push_back(fieldIndex);
+            }
+        }
+        for(auto& cont : validFields)
+        {
+            cont.erase(std::remove_if(cont.begin(), cont.end(), [&toErase](Number value)
+            {
+                return std::find(toErase.begin(), toErase.end(), value) != toErase.end();
+            }), cont.end());
+        }
+    }
+    std::vector<std::pair<std::string, Number>> ownTicket;
+    for(auto [pos, fieldIdx] : matches)
+    {
+        std::string name = fields[fieldIdx].name;
+        Number value = tickets[0].values[pos];
+        ownTicket.push_back({name , value});
+    }
+
+    std::vector<std::pair<std::string, Number>> departures;
+    for(auto& [name, value] : ownTicket)
+    {
+        if(name.find("departure") != std::string::npos)
+        {
+            departures.push_back({name, value});
+        }
+    }
+    
+    Number result = std::accumulate(departures.begin(), departures.end(), (Number)1, [](Number sum, auto& pair)
+    {
+        return sum *= pair.second;
+    });
+
+    int debug = 123;
+    return result;
 }
 
 
@@ -245,8 +299,10 @@ void solve()
 {
     std::filesystem::path inputPath{std::filesystem::current_path().parent_path()};
     std::filesystem::path testPath{std::filesystem::current_path().parent_path()};
+    std::filesystem::path testPath2{std::filesystem::current_path().parent_path()};
     inputPath += "/data/PuzzleInput/Day16/input.txt";
     testPath += "/data/PuzzleInput/Day16/test";
+    testPath2 += "/data/PuzzleInput/Day16/test2";
 
     auto resultTest = getAnswerPart1(testPath);
     std::cout << "test part1: " << resultTest << "\n";
@@ -257,13 +313,13 @@ void solve()
     //assert(resultInput == 304);
 
 
-    auto resultTest2 = getAnswerPart2(testPath);
-    std::cout << "test part2: " << resultTest2 << "\n";
+    //auto resultTest2 = getAnswerPart2(testPath2);
+    //std::cout << "test part2: " << resultTest2 << "\n";
     //assert(resultTest2 == 208);
 
     auto resultInput2 = getAnswerPart2(inputPath);
     std::cout << "real part2: " << resultInput2 << "\n";
-    //assert(resultInput2 == 3348493585827);
+    assert(resultInput2 == 2325343130651);
 
     int debug = 123;
 }

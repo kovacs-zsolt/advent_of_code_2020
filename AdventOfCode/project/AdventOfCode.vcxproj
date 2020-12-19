@@ -29,6 +29,11 @@
     <ClCompile Include="..\source\Day16.cpp" />
     <ClCompile Include="..\source\Day17.cpp" />
     <ClCompile Include="..\source\Day17_part2.cpp" />
+    <ClCompile Include="..\source\Day18.cpp" />
+    <ClCompile Include="..\source\Day18\Parser.cpp" />
+    <ClCompile Include="..\source\Day18\Recogniser.cpp" />
+    <ClCompile Include="..\source\Day18\Shunting-yard.cpp" />
+    <ClCompile Include="..\source\Day18\Tokenizer.cpp" />
     <ClCompile Include="..\source\Day2.cpp" />
     <ClCompile Include="..\source\Day3.cpp" />
     <ClCompile Include="..\source\Day4.cpp" />
@@ -38,6 +43,12 @@
     <ClCompile Include="..\source\Day8.cpp" />
     <ClCompile Include="..\source\Day9.cpp" />
     <ClCompile Include="..\source\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\source\Day18\Parser.hh" />
+    <ClInclude Include="..\source\Day18\Recogniser.hh" />
+    <ClInclude Include="..\source\Day18\Shunting-yard.hh" />
+    <ClInclude Include="..\source\Day18\Tokenizer.hh" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
